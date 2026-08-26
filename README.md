@@ -60,7 +60,7 @@ A aplicação utiliza uma separação entre **rotas**, **regras de negócio**, *
 
 As rotas de tarefas utilizam o usuário autenticado para determinar quais tarefas podem ser acessadas.
 
-## Authentication
+## Autenticação
 
 Após realizar o login, a API retorna um token JWT.
 
