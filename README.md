@@ -73,7 +73,7 @@ As senhas dos usuários são armazenadas utilizando hash.
 * Python 3
 * PostgreSQL
 
-### Installation
+### Instalação
 
 Clone o repositório
 Crie um ambiente virtual
@@ -102,7 +102,7 @@ A API estará disponível em:
 http://127.0.0.1:8000
 ```
 
-## Documentation
+## Documentação
 
 O FastAPI disponibiliza documentação interativa automaticamente.
 
