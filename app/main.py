@@ -1,3 +1,5 @@
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI
 from app.database import engine,Base
 from app.models import User
@@ -19,3 +21,9 @@ app.include_router(tasks_router)
 @app.get("/")
 def root():  
     return {"message": "Bem-vindo ao Gerenciador de Tarefas!"}
+
+
+# The frontend is optional: build it with npm run build in frontend/.
+frontend_dist = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+if frontend_dist.is_dir():
+    app.mount("/ui", StaticFiles(directory=frontend_dist, html=True), name="frontend")

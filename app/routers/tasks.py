@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 from app.dependencies import get_db, get_current_user
 from app.models.user import User
@@ -21,10 +21,12 @@ def create_task(
 
 @router.get ("/", response_model=list[TaskResponse])
 def get_tasks(
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=100),
     db:Session=Depends(get_db),
     current_user:User =Depends(get_current_user)
 ):
-    return TaskService.get_user_task(db=db,user_id=current_user.id)
+    return TaskService.get_user_task(db=db,user_id=current_user.id, offset=offset, limit=limit)
 
 
 @router.get("/{task_id}", response_model=TaskResponse)

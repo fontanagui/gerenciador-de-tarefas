@@ -27,8 +27,8 @@ class TaskService:
 
 
     @staticmethod
-    def get_user_task( db: Session, user_id: int):
-        return db.query(Task).filter(Task.user_id==user_id).all()
+    def get_user_task(db: Session, user_id: int, offset: int = 0, limit: int = 50):
+        return db.query(Task).filter(Task.user_id==user_id).order_by(Task.id).offset(offset).limit(limit).all()
 
     @staticmethod
     def get_task_byid(db:Session,task_id:int,user_id:int)-> Task:

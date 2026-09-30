@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from app.models.user import User    
 from app.schemas.users import UserCreate, UserUpdate
 from fastapi import HTTPException
@@ -9,7 +10,7 @@ class UserService:
     def create_user(db: Session, user: UserCreate):
         existing_user =db.query(User).filter((User.username == user.username) | (User.email == user.email)).first()
         if existing_user:
-            raise HTTPException(status_code=400, detail="user ja registrado")
+            raise HTTPException(status_code=409, detail="user ja registrado")
 
         hashed_password = get_password_hash(user.password)
         db_user = User(
@@ -18,7 +19,11 @@ class UserService:
             password=hashed_password
         )
         db.add(db_user)
-        db.commit()
+        try:
+            db.commit()
+        except IntegrityError as exc:
+            db.rollback()
+            raise HTTPException(status_code=409, detail="Conflito nos dados do usuário") from exc
         db.refresh(db_user)
         return db_user
 
@@ -41,7 +46,11 @@ class UserService:
             raise HTTPException(status_code=404, detail="User nao encontrado")
         user_db.username = updated_user.username
         user_db.email = updated_user.email
-        db.commit()
+        try:
+            db.commit()
+        except IntegrityError as exc:
+            db.rollback()
+            raise HTTPException(status_code=409, detail="Conflito nos dados do usuário") from exc
         db.refresh(user_db)
         return user_db
 
@@ -53,7 +62,11 @@ class UserService:
         if not user_db:
             raise HTTPException(status_code=404, detail="User nao encontrado")
         db.delete(user_db)
-        db.commit()
+        try:
+            db.commit()
+        except IntegrityError as exc:
+            db.rollback()
+            raise HTTPException(status_code=409, detail="Conflito nos dados do usuário") from exc
         return {"mensagem": "User deletedo"}
 
 
@@ -61,7 +74,7 @@ class UserService:
     def autentica_user(db:Session, email:str, passwd:str):
         user = db.query(User).filter(User.email == email).first()
         if not user:
-            raise HTTPException(status_code=404, detail="User nao encontrado")
+            raise HTTPException(status_code=401, detail="Credenciais invalidas", headers={"WWW-Authenticate": "Bearer"})
         if not verifica_pswd(passwd, user.password):
-            raise HTTPException(status_code=401, detail="Senha incorreta")
+            raise HTTPException(status_code=401, detail="Credenciais invalidas", headers={"WWW-Authenticate": "Bearer"})
         return user

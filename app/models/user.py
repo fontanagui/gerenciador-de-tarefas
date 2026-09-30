@@ -17,4 +17,4 @@ class User(Base):
 
 
 
-    tasks = relationship("Task", back_populates="owner")
+    tasks = relationship("Task", back_populates="owner", cascade="all, delete-orphan")
